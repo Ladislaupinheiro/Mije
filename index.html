@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-AO">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mije - Gestão Familiar</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+    <script src="app.js" defer></script>
+</head>
+<body class="text-slate-800 h-screen overflow-hidden bg-slate-50">
+
+    <div id="onboarding-screen" class="fixed inset-0 z-50 bg-white hidden flex-col">
+        <div class="flex-1 flex flex-col justify-center items-center p-8 max-w-lg mx-auto w-full">
+            
+            <div id="step-1" class="step-content w-full fade-in text-center">
+                <div class="mb-6 bg-blue-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto text-blue-600">
+                    <i data-lucide="crown" class="w-10 h-10"></i>
+                </div>
+                <h2 class="text-2xl font-black text-slate-900 mb-2">Quem gere a casa?</h2>
+                <p class="text-slate-500 mb-8">Vamos definir o gestor principal.</p>
+                
+                <div class="relative w-24 h-24 mx-auto mb-6">
+                    <input type="file" id="gestor-photo" accept="image/*" class="hidden">
+                    <label for="gestor-photo" class="block w-full h-full rounded-full bg-slate-100 border-2 border-dashed border-slate-300 cursor-pointer overflow-hidden photo-upload-zone" id="preview-gestor"></label>
+                </div>
+                
+                <input type="text" id="gestor-name" placeholder="Seu nome" class="w-full p-4 bg-slate-50 rounded-xl border border-slate-200 text-center font-bold text-lg mb-4 outline-none focus:ring-2 focus:ring-blue-500">
+                <button id="btn-next-1" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold shadow-lg shadow-blue-200">Continuar</button>
+            </div>
+
+            <div id="step-2" class="step-content w-full fade-in hidden">
+                <h2 class="text-2xl font-black text-slate-900 mb-2">De onde vem o dinheiro?</h2>
+                <p class="text-slate-500 mb-6">Cadastre as fontes de renda fixa.</p>
+                <div id="income-list" class="space-y-3 mb-6 max-h-60 overflow-y-auto"></div>
+                <div class="flex gap-2 mb-6">
+                    <input type="text" id="income-desc" placeholder="Ex: Salário" class="flex-1 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                    <input type="number" id="income-val" placeholder="Kz" class="w-24 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                    <button id="btn-add-income" class="bg-emerald-500 text-white p-3 rounded-lg"><i data-lucide="plus"></i></button>
+                </div>
+                <button id="btn-next-2" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold shadow-lg shadow-blue-200">Próximo</button>
+            </div>
+
+            <div id="step-3" class="step-content w-full fade-in hidden">
+                <h2 class="text-2xl font-black text-slate-900 mb-2">Quem faz parte?</h2>
+                <p class="text-slate-500 mb-6">Adicione familiares e dependentes.</p>
+                <div id="people-list-onboard" class="grid grid-cols-3 gap-2 mb-6 max-h-60 overflow-y-auto"></div>
+                <div class="bg-slate-50 p-4 rounded-xl mb-6">
+                    <div class="flex items-center gap-3 mb-3">
+                        <input type="file" id="person-photo" accept="image/*" class="hidden">
+                        <label for="person-photo" class="w-12 h-12 rounded-full bg-white border border-slate-200 cursor-pointer overflow-hidden photo-upload-zone flex-shrink-0" id="preview-person"></label>
+                        <input type="text" id="person-name" placeholder="Nome" class="flex-1 bg-transparent outline-none font-medium">
+                    </div>
+                    <button id="btn-add-person" class="w-full bg-slate-200 text-slate-600 py-2 rounded-lg font-bold text-sm">Adicionar à Lista</button>
+                </div>
+                <button id="btn-finish-onboard" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold shadow-lg shadow-blue-200">Começar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="app-container" class="h-full flex flex-col md:flex-row hidden">
+        
+        <aside class="hidden md:flex flex-col w-64 bg-white border-r border-slate-200 h-full p-6 shadow-sm z-20">
+            <div class="flex items-center gap-3 mb-8">
+                <div id="sidebar-avatar" class="w-10 h-10 rounded-full bg-slate-200 overflow-hidden bg-cover bg-center"></div>
+                <div>
+                    <h1 class="text-xl font-black text-slate-900">MIJE PRO</h1>
+                    <p id="sidebar-role" class="text-xs text-slate-500 font-medium">Gestão Completa</p>
+                </div>
+            </div>
+            <nav class="flex-1 space-y-1 overflow-y-auto pr-2" id="desktop-nav"></nav>
+            <div class="pt-4 mt-2 border-t border-slate-100 space-y-2">
+                <button id="btn-export" class="flex items-center gap-3 text-slate-500 hover:text-blue-600 transition p-2 w-full text-xs font-bold">
+                    <i data-lucide="download" class="w-4 h-4"></i> Backup Dados
+                </button>
+                <button id="btn-reset" class="flex items-center gap-3 text-rose-400 hover:text-rose-600 transition p-2 w-full text-xs font-bold">
+                    <i data-lucide="trash" class="w-4 h-4"></i> Reiniciar
+                </button>
+            </div>
+        </aside>
+
+        <main class="flex-1 h-full overflow-hidden flex flex-col relative">
+            <header class="md:hidden bg-white/90 backdrop-blur border-b border-slate-200 px-4 py-3 flex justify-between items-center z-10">
+                <div class="flex items-center gap-3">
+                    <div id="mobile-avatar" class="w-8 h-8 rounded-full bg-slate-200 overflow-hidden bg-cover bg-center"></div>
+                    <span class="font-black text-lg text-blue-600">MIJE</span>
+                </div>
+                <div class="flex gap-2">
+                    <button id="btn-whatsapp" class="text-green-600 bg-green-50 p-2 rounded-full"><i data-lucide="share-2" class="w-5 h-5"></i></button>
+                    <button id="btn-new-mobile" class="bg-blue-600 text-white p-2 rounded-full shadow-lg shadow-blue-200"><i data-lucide="plus" class="w-5 h-5"></i></button>
+                </div>
+            </header>
+
+            <div id="content" class="flex-1 overflow-y-auto p-4 md:p-10 pb-28 md:pb-10 max-w-6xl mx-auto w-full fade-in scroll-smooth"></div>
+
+            <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-4 py-3 flex justify-between items-center z-30 pb-safe">
+                <button id="nav-dashboard" class="text-blue-600 flex flex-col items-center gap-1"><i data-lucide="layout-dashboard" class="w-6 h-6"></i><span class="text-[10px] font-bold">Painel</span></button>
+                <button id="nav-perfis" class="text-slate-400 flex flex-col items-center gap-1"><i data-lucide="users" class="w-6 h-6"></i><span class="text-[10px]">Pessoas</span></button>
+                <button id="nav-gastos" class="text-slate-400 flex flex-col items-center gap-1"><i data-lucide="shopping-bag" class="w-6 h-6"></i><span class="text-[10px]">Gastos</span></button>
+                <button id="nav-menu" class="text-slate-400 flex flex-col items-center gap-1"><i data-lucide="grid" class="w-6 h-6"></i><span class="text-[10px]">Mais</span></button>
+            </nav>
+        </main>
+    </div>
+
+    <div id="mobile-menu-overlay" class="fixed inset-0 bg-slate-900/50 z-40 hidden flex items-end">
+        <div class="bg-white w-full rounded-t-3xl p-6 pb-24 animate-slide-up max-h-[80vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="font-bold text-lg text-slate-800">Menu Completo</h3>
+                <button id="close-mobile-menu" class="bg-slate-100 p-2 rounded-full"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+            <div class="grid grid-cols-4 gap-4" id="mobile-menu-grid"></div>
+            
+            <div class="mt-8 pt-6 border-t border-slate-100 grid grid-cols-2 gap-4">
+                <button id="btn-export-mobile" class="flex items-center justify-center gap-2 bg-slate-50 p-4 rounded-xl font-bold text-xs text-slate-600">
+                    <i data-lucide="download" class="w-4 h-4"></i> Backup
+                </button>
+                <button id="btn-reset-mobile" class="flex items-center justify-center gap-2 bg-rose-50 p-4 rounded-xl font-bold text-xs text-rose-600">
+                    <i data-lucide="trash" class="w-4 h-4"></i> Reset
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="profile-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm hidden z-50 flex items-end md:items-center justify-center">
+        <div class="bg-white w-full md:max-w-md h-[90vh] md:h-[80vh] md:rounded-3xl rounded-t-3xl overflow-hidden flex flex-col slide-left">
+            <div class="relative h-32 bg-gradient-to-r from-blue-600 to-indigo-600 flex-shrink-0">
+                <button id="btn-close-profile" class="absolute top-4 right-4 bg-white/20 text-white p-2 rounded-full hover:bg-white/30"><i data-lucide="x"></i></button>
+                <div id="profile-detail-img" class="absolute -bottom-10 left-6 w-24 h-24 rounded-full border-4 border-white bg-slate-200 bg-cover bg-center shadow-lg flex items-center justify-center text-3xl font-bold text-slate-400"></div>
+            </div>
+            <div class="mt-12 px-6 pb-4 border-b border-slate-100 flex-shrink-0">
+                <h2 id="profile-detail-name" class="text-2xl font-black text-slate-800">Nome</h2>
+                <p id="profile-detail-type" class="text-sm text-slate-500 font-medium">Tipo</p>
+                <div class="grid grid-cols-2 gap-4 mt-4">
+                    <div class="bg-green-50 p-3 rounded-xl">
+                        <p class="text-xs text-green-600 font-bold uppercase">Total Aprovado</p>
+                        <p id="profile-detail-total" class="text-xl font-black text-green-700">0 Kz</p>
+                    </div>
+                    <div class="bg-orange-50 p-3 rounded-xl">
+                        <p class="text-xs text-orange-600 font-bold uppercase">Pedidos Recusados</p>
+                        <p id="profile-detail-denied" class="text-xl font-black text-orange-700">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="flex-1 overflow-y-auto p-6 bg-slate-50">
+                <h3 class="font-bold text-slate-600 mb-4 text-sm uppercase tracking-wide">Histórico de Movimentos</h3>
+                <div id="profile-history-list" class="space-y-3"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal" class="fixed inset-0 bg-slate-900/60 hidden flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] flex flex-col">
+            <div class="p-4 border-b flex justify-between items-center bg-slate-50 rounded-t-2xl">
+                <h3 id="modal-title" class="font-bold text-lg text-slate-800">Novo</h3>
+                <button id="btn-close-modal" class="bg-white p-1 rounded-full border border-slate-200"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <form id="modal-form" class="p-6 overflow-y-auto space-y-4">
+                <div id="form-fields"></div>
+                <button type="submit" class="w-full bg-blue-600 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-blue-200">Salvar Registo</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast" class="fixed top-5 right-5 bg-slate-800 text-white px-6 py-3 rounded-xl shadow-2xl transform translate-x-[150%] transition-transform duration-300 z-[60] flex items-center gap-3">
+        <i data-lucide="check-circle" class="text-emerald-400 w-5 h-5"></i>
+        <span id="toast-msg" class="font-medium text-sm">Sucesso!</span>
+    </div>
+
+</body>
+</html>
